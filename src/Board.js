@@ -29,6 +29,15 @@ import './Board.css';
  *
  **/
 
+
+ //first we make a nested array of random boolean values, createBoard()
+ //Example: let board = [[true,false,true], [false,false,true], [true,false,false],]
+ //then within our render we create another nested array of rows and cells
+ //within the render loops we give each cell a boolean prop "isLit" that corresponds to the other nested array at the same matchiing position 
+//we do this  isLit={this.state.board[y][x]}, both [y] and [x] correspond to the nested array board[][]
+
+
+
 class Board extends Component {
 
   constructor(props) {
@@ -45,13 +54,15 @@ static defaultProps = {
   chanceLightStartsOn: 0.25
 };
   /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
-
+  //board should be a collection of rows arrays that store random boolean values
   createBoard() {
     let board = [];
     // TODO: create array-of-arrays of true/false values
     for (let y = 0; y < this.props.nrows; y++) {
+      //create a row array for every row in props
       let row = [];
       for(let x = 0; x < this.props.ncols; x++) {
+        //into the row array push true or false if random num is greater than 0.25
         row.push(Math.random() < this.props.chanceLightStartsOn)
       }
       board.push(row);
@@ -95,11 +106,27 @@ static defaultProps = {
     // make table board
 
     // TODO
+    let tblBoard = [];
+    for(let y = 0; y < this.props.nrows; y++) {
+      let row = [];
+      for (let x =0; x < this.props.ncols; x++) {
+        //indexes of nested arrays are accessed via [][], we are accessing the values of a nested array 
+        //we are pushing the value at the index of each nested array in the board array, those indexes are holding boolean values
+        //row.push <Cell />
+        //Cell isLit=each index of board and its value, example [1][2] would equal true/false
+        let coord = `${y}-${x}`;
+        row.push(<Cell 
+                    key={coord} 
+                    isLit={this.state.board[y][x]} 
+                    flipCellsAroundMe={() => this.flipCellsAround(coord)}/>);
+      }
+      tblBoard.push(<tr key={y}>{row}</tr>)
+    }
     return (
       <table className="Board">
         <tbody>
-          <tr key="0">
-            <Cell key="0-0" isLit={false} />
+          {/* <tr key="0">
+            <Cell key="0-0" isLit={false} /> 
             <Cell key="0-1" isLit={true} />
             <Cell key="0-2" isLit={true} />
             <Cell key="0-3" isLit={true} />
@@ -117,8 +144,9 @@ static defaultProps = {
             <Cell key="2-1" isLit={true} />
             <Cell key="2-2" isLit={true} />
             <Cell key="2-3" isLit={true} />
-            <Cell key="2-4" isLit={true} />
-          </tr>
+            <Cell key="2-4" isLit={true} /> 
+          </tr> */}
+            {tblBoard}
         </tbody>
       </table>
     )
