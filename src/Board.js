@@ -55,6 +55,7 @@ static defaultProps = {
 };
   /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
   //board should be a collection of rows arrays that store random boolean values
+  //createBoard is not responsible for rendering the board!!! We use the same nested for loop technique below for rendering, this is only supposed to create a values board
   createBoard() {
     let board = [];
     // TODO: create array-of-arrays of true/false values
@@ -67,33 +68,51 @@ static defaultProps = {
       }
       board.push(row);
     }
+    //  LOOK AT WHERE WE CALL CREATEBOARD()
     return board
   }
 
   /** handle changing a cell: update board & determine if winner */
-
+// ---------------------------------------------------------------------------------------------------------------
   flipCellsAround(coord) {
+    //deconstruct props for easier access FOR EXAMPLE:
+    // let ncols = this.props.ncols
+    // let nrows = this.props.rows
     let {ncols, nrows} = this.props;
     let board = this.state.board;
+    //split our coordinates into two numbers held by y an x
     let [y, x] = coord.split("-").map(Number);
 
 
     function flipCell(y, x) {
-      // if this coord is actually on board, flip it
-
+      // the if logic is if this coord is actually on board, flip it, meaning cant flip a 7-1 on a 5-5
       if (x >= 0 && x < ncols && y >= 0 && y < nrows) {
+        //change the value of true to false
         board[y][x] = !board[y][x];
       }
     }
-
-    // TODO: flip this cell and the cells around it
+    //flip cells around selected cell
+    flipCell(y, x); //flip initial cell
+    flipCell(y, x - 1); //flip left
+    flipCell(y, x + 1); //flip right
+    flipCell(y - 1, x); //flip bottom
+    flipCell(y + 1, x); //flip top
 
     // win when every cell is turned off
     // TODO: determine is the game has been won
+    //we will use two .every methods, instead of looping through a nested array
+    //The every() method tests whether all elements in the array pass the test implemented by the provided function. It returns a Boolean value.
+    //example:
+    // const isBelowThreshold = (currentValue) => currentValue < 40;
+    // const array1 = [1, 30, 39, 29, 10, 13];
+    // console.log(array1.every(isBelowThreshold));
+    // expected output: true
 
-    // this.setState({board, hasWon});
+    let hasWon = board.every(row => row.every(cell => !cell));
+
+    this.setState({board: board, hasWon: hasWon});
   }
-
+// ---------------------------------------------------------------------------------------------------------------
 
   /** Render game board or winning message. */
 
@@ -101,11 +120,10 @@ static defaultProps = {
 
     // if the game is won, just show a winning msg & render nothing else
 
-    // TODO
 
     // make table board
-
-    // TODO
+    //this is the same function as above that creates a row for every number of rows held in nrow state
+    //except instead of random true/false values we will be filling the rows with Cell components where the value of lit is the boolean value associated with the cell
     let tblBoard = [];
     for(let y = 0; y < this.props.nrows; y++) {
       let row = [];
@@ -123,32 +141,42 @@ static defaultProps = {
       tblBoard.push(<tr key={y}>{row}</tr>)
     }
     return (
+      <div>
+      <h1 className={this.state.hasWon ? 'neon-blue' : 'neon-orange'}>{this.state.hasWon ?  'You Won!' : 'Lights Out'}</h1>
       <table className="Board">
         <tbody>
-          {/* <tr key="0">
-            <Cell key="0-0" isLit={false} /> 
-            <Cell key="0-1" isLit={true} />
-            <Cell key="0-2" isLit={true} />
-            <Cell key="0-3" isLit={true} />
-            <Cell key="0-4" isLit={true} />
+            {tblBoard}
+
+                      {/* 
+          this is what fills the array tbleBoard
+          <tr key="0">
+          <Cell key="0-0" isLit={false} /> 
+          <Cell key="0-1" isLit={true} />
+          <Cell key="0-2" isLit={true} />
+          <Cell key="0-3" isLit={true} />
+          <Cell key="0-4" isLit={true} />
           </tr>
           <tr key="1">
-            <Cell key="1-0" isLit={true} />
-            <Cell key="1-1" isLit={true} />
-            <Cell key="1-2" isLit={true} />
-            <Cell key="1-3" isLit={true} />
-            <Cell key="1-4" isLit={true} />
+          <Cell key="1-0" isLit={true} />
+          <Cell key="1-1" isLit={true} />
+          <Cell key="1-2" isLit={true} />
+          <Cell key="1-3" isLit={true} />
+          <Cell key="1-4" isLit={true} />
           </tr>
           <tr key="2">
-            <Cell key="2-0" isLit={true} />
-            <Cell key="2-1" isLit={true} />
-            <Cell key="2-2" isLit={true} />
-            <Cell key="2-3" isLit={true} />
-            <Cell key="2-4" isLit={true} /> 
-          </tr> */}
-            {tblBoard}
+          <Cell key="2-0" isLit={true} />
+          <Cell key="2-1" isLit={true} />
+          <Cell key="2-2" isLit={true} />
+          <Cell key="2-3" isLit={true} />
+          <Cell key="2-4" isLit={true} /> 
+        </tr> */}
         </tbody>
       </table>
+      {this.state.hasWon ? <div>
+                              <h1 className='neon-blue'>Play Again?</h1>
+                              <button className='reset'>Reset</button>
+                            </div> : ''}
+      </div>
     )
   }
 }
